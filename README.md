@@ -4,7 +4,9 @@ Phone-accessible tracker for a 5K running + gym plan.
 
 ## Main features
 
-- Front page daily log with date and automatic Gym / Run / Recovery day.
+- First screen is a clean summary only: weekly progress, date, session type and today’s plan.
+- Smooth scroll down to the detailed logging page.
+- Colour-coded design for gym, running and recovery.
 - Gym days: choose a saved plan, then log exercises with weight, reps, sets and effort.
 - Run days: log distance, pace, time, run type and how it felt.
 - Daily check-in: body weight, steps, mood, energy level and notes.
