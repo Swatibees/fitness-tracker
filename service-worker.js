@@ -1,4 +1,4 @@
-const CACHE_NAME = '5k-fitness-tracker-v4-session-flow';
+const CACHE_NAME = '5k-fitness-tracker-v5-clean-subpages';
 const ASSETS = [
   './',
   './index.html',

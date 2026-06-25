@@ -1,41 +1,39 @@
-# 5K Fitness Tracker PWA
+# 5K + Gym Tracker
 
-Phone-accessible tracker for a 5K running + gym plan.
+Phone-friendly Progressive Web App for tracking:
 
-## Main features
+- Weekly 5K running progress
+- Gym sessions and custom plans
+- Exercise weight, reps, sets and effort
+- Run distance, pace and time
+- Daily body weight, steps, mood, energy and notes
 
-- First screen keeps the main summary clean: weekly progress, run total, latest weight and energy.
-- First screen also has date and session type only.
-- When you choose Gym, Run or Rest, the app smoothly moves to the session details page.
-- Gym days: choose a saved plan, then log exercises with weight, reps, sets and effort.
-- Run days: log distance, pace, time, run type and how it felt.
-- Daily check-in: body weight, steps, mood, energy level and notes.
-- Progress screen: logged days, total runs, best distance, weight change and 5K progress.
-- Custom gym plans: add your own plans and exercises.
-- Backup/export and import.
+## Current version
 
-## GitHub Pages update steps
+v5-clean-subpages
 
-1. Unzip this folder.
-2. Open your GitHub repository.
-3. Upload/replace all files in the repository root:
-   - `index.html`
-   - `manifest.json`
-   - `service-worker.js`
-   - `icon-192.png`
-   - `icon-512.png`
-   - `README.md`
-4. Commit the changes.
-5. Wait for GitHub Pages to deploy.
-6. Open your GitHub Pages link on your phone.
+## Layout
 
-## If your phone still shows the old version
+The Today tab now opens with the main summary first:
 
-The phone app may be using the old PWA cache. Try these in order:
+1. Weekly summary cards
+2. Date picker
+3. Session type picker
+4. Gym / Run / Rest buttons
 
-1. Close the app completely and reopen it.
-2. Open the GitHub Pages link in the phone browser and refresh twice.
-3. Remove the home-screen app icon and add it again.
-4. If needed, clear website data/cache for the GitHub Pages site and reopen the link.
+Choosing a session opens a separate session sub-page. Use the Summary arrow button to return.
 
-Your data is saved locally in your phone/browser. Use **Data > Export backup** regularly.
+## Publish on GitHub Pages
+
+Upload all files in this folder to the root of your GitHub repository, then enable Pages from the main branch and root folder.
+
+## Phone cache note
+
+If your phone still shows an older version after deployment:
+
+1. Wait for the GitHub Actions deployment to show a green tick.
+2. Open the site link directly in Safari/Chrome and refresh twice.
+3. Close the home-screen app fully and reopen it.
+4. If needed, remove the old home-screen icon and add it again.
+
+Your tracker data is saved locally in the browser/app. Use Export backup regularly.

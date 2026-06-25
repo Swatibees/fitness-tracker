@@ -118,22 +118,32 @@
 
     .screen { display: none; }
     .screen.active { display: block; }
+    .subpage { display: none; }
+    .subpage.active { display: block; }
 
     .page-panel {
-      min-height: calc(100svh - 96px);
+      min-height: calc(100svh - 106px);
       scroll-margin-top: 76px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
       padding: 6px 0 22px;
     }
 
-    .page-panel.details {
-      justify-content: flex-start;
-      padding-top: 16px;
+    .summary-page {
+      display: none;
     }
 
-    .page-panel.details.reveal {
+    .summary-page.active {
+      display: block;
+    }
+
+    .summary-head {
+      padding: 4px 2px 0;
+    }
+
+    .page-panel.details {
+      padding-top: 8px;
+    }
+
+    .page-panel.details.active {
       animation: pageReveal .34s ease both;
     }
 
@@ -401,36 +411,10 @@
       <section id="todayScreen" class="screen active" aria-labelledby="todayTitle">
         <h2 id="todayTitle" class="sr-only">Today</h2>
 
-        <section id="todayOverview" class="page-panel" aria-labelledby="overviewTitle">
-          <div class="hero">
-            <div class="hero-content">
-              <p class="muted" id="overviewKicker">Today’s plan</p>
-              <h2 id="overviewTitle">Choose date + session</h2>
-              <p class="muted">Pick Gym, Run or Rest. The session details open on the next page.</p>
-
-              <div class="hero-grid">
-                <div>
-                  <label for="dateInput">Date</label>
-                  <input id="dateInput" type="date">
-                </div>
-                <div>
-                  <label for="sessionType">Session type</label>
-                  <select id="sessionType">
-                    <option value="gym">Gym day</option>
-                    <option value="run">Run day</option>
-                    <option value="recovery">Recovery/rest day</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="section">
-                <div class="session-pill-row" aria-label="Quick session type">
-                  <button type="button" class="session-pill" data-session="gym">🏋️ Gym →</button>
-                  <button type="button" class="session-pill" data-session="run">🏃 Run →</button>
-                  <button type="button" class="session-pill" data-session="recovery">🌿 Rest →</button>
-                </div>
-              </div>
-            </div>
+        <section id="todayOverview" class="subpage active page-panel summary-page" aria-labelledby="overviewTitle">
+          <div class="summary-head">
+            <p class="muted" id="overviewKicker">Today’s summary</p>
+            <h2 id="overviewTitle">Main summary</h2>
           </div>
 
           <div class="grid metrics section" aria-live="polite">
@@ -456,17 +440,39 @@
             </div>
           </div>
 
-          <div class="plan-summary section" id="autoPlanBox">
-            <strong id="autoPlanTitle">—</strong>
-            <span class="muted" id="autoPlanDetail">—</span>
-          </div>
+          <div class="hero section">
+            <div class="hero-content">
+              <p class="muted">Choose session</p>
+              <h2>Pick today’s session →</h2>
+              <p class="muted">Choose Gym, Run or Rest. The tracker will open the right sub-page.</p>
 
-          <div class="section">
-            <button type="button" class="primary" id="goToLogBtn">Continue to session details →</button>
+              <div class="hero-grid">
+                <div>
+                  <label for="dateInput">Date</label>
+                  <input id="dateInput" type="date">
+                </div>
+                <div>
+                  <label for="sessionType">Session type</label>
+                  <select id="sessionType">
+                    <option value="gym">Gym day</option>
+                    <option value="run">Run day</option>
+                    <option value="recovery">Recovery/rest day</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="section">
+                <div class="session-pill-row" aria-label="Open session sub-page">
+                  <button type="button" class="session-pill" data-session="gym">🏋️ Gym →</button>
+                  <button type="button" class="session-pill" data-session="run">🏃 Run →</button>
+                  <button type="button" class="session-pill" data-session="recovery">🌿 Rest →</button>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
-        <section id="todayLogPanel" class="page-panel details" aria-labelledby="logDetailsTitle">
+        <section id="todayLogPanel" class="subpage page-panel details" aria-labelledby="logDetailsTitle">
           <div class="card">
             <div class="top-row">
               <div>
@@ -633,7 +639,7 @@
         <h2 id="dataTitle">Data</h2>
         <div class="card">
           <h2>Backup</h2>
-          <p class="muted">Your tracker saves data on this phone/browser. Export a backup regularly. App version: v4-session-flow.</p>
+          <p class="muted">Your tracker saves data on this phone/browser. Export a backup regularly. App version: v5-clean-subpages.</p>
           <div class="inline-actions section">
             <button type="button" class="secondary" id="exportBtn">Export backup</button>
             <button type="button" class="ghost" id="importBtn">Import backup</button>
@@ -691,7 +697,7 @@
     };
 
     const STORAGE_KEY = 'fitness5kTrackerV2';
-    const APP_VERSION = 'v4-session-flow';
+    const APP_VERSION = 'v5-clean-subpages';
     let state = loadState();
 
     const els = {
@@ -700,8 +706,7 @@
       overviewKicker: document.getElementById('overviewKicker'),
       dateInput: document.getElementById('dateInput'),
       sessionType: document.getElementById('sessionType'),
-      autoPlanTitle: document.getElementById('autoPlanTitle'),
-      autoPlanDetail: document.getElementById('autoPlanDetail'),
+      logDetailsTitle: document.getElementById('logDetailsTitle'),
       logContext: document.getElementById('logContext'),
       gymSection: document.getElementById('gymSection'),
       runSection: document.getElementById('runSection'),
@@ -744,7 +749,6 @@
       backupText: document.getElementById('backupText'),
       dataStatus: document.getElementById('dataStatus'),
       clearBtn: document.getElementById('clearBtn'),
-      goToLogBtn: document.getElementById('goToLogBtn'),
       backToSummaryBtn: document.getElementById('backToSummaryBtn')
     };
 
@@ -838,13 +842,22 @@
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
+    function showTodaySummary() {
+      document.getElementById('todayOverview').classList.add('active');
+      document.getElementById('todayLogPanel').classList.remove('active');
+      els.subtitle.textContent = 'Summary first. Choose a session to continue.';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     function openSessionDetails() {
       updateSessionUi();
+      document.getElementById('todayOverview').classList.remove('active');
       const panel = document.getElementById('todayLogPanel');
-      panel.classList.remove('reveal');
+      panel.classList.remove('active');
       void panel.offsetWidth;
-      panel.classList.add('reveal');
-      scrollToElement(panel);
+      panel.classList.add('active');
+      els.subtitle.textContent = 'Session sub-page. Use the arrow to go back.';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function setActiveTab(screenId) {
@@ -853,7 +866,10 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
       if (screenId === 'progressScreen') renderProgress();
       if (screenId === 'plansScreen') renderPlans();
-      if (screenId === 'todayScreen') renderMetrics();
+      if (screenId === 'todayScreen') {
+        renderMetrics();
+        showTodaySummary();
+      }
     }
 
     function initPlanSelect() {
@@ -935,20 +951,22 @@
       const day = dayName(iso);
       const label = sessionLabel(type);
       els.todayBadge.textContent = iso === todayIso() ? 'Today' : day.slice(0, 3);
-      els.overviewKicker.textContent = `${sessionEmoji(type)} ${day}`;
-      els.logContext.textContent = `${day} ${iso} · ${label}`;
+      els.overviewKicker.textContent = `Today’s summary · ${day}`;
+      els.logDetailsTitle.textContent = `${sessionEmoji(type)} ${label}`;
+      els.logContext.textContent = `${day} ${iso} · ${detailLineForSession(type)}`;
+    }
 
+    function detailLineForSession(type) {
+      const iso = els.dateInput.value;
+      const day = dayName(iso);
       if (type === 'gym') {
         const plan = allPlans()[els.gymPlanSelect.value];
-        els.autoPlanTitle.textContent = `${day}: ${plan?.name || 'Gym plan'}`;
-        els.autoPlanDetail.textContent = plan?.description || 'Choose a gym plan and log each exercise.';
-      } else if (type === 'run') {
-        els.autoPlanTitle.textContent = `${day}: ${els.runType.value}`;
-        els.autoPlanDetail.textContent = 'Log Runna distance, pace and time after the run.';
-      } else {
-        els.autoPlanTitle.textContent = `${day}: Recovery/rest day`;
-        els.autoPlanDetail.textContent = 'Light walk, stretching, hydration and sleep. Still log weight, mood and energy.';
+        return `${plan?.name || 'Gym plan'} · add weight, reps and sets`;
       }
+      if (type === 'run') {
+        return `${els.runType.value || recommendedRunType(iso)} · add distance and pace`;
+      }
+      return 'Recovery check-in · log weight, mood and energy';
     }
 
     function loadDate(iso) {
@@ -1046,7 +1064,7 @@
       els.saveStatus.textContent = `Saved ${dayName(iso)} ${iso}.`;
       renderMetrics();
       renderProgress();
-      scrollToElement(document.getElementById('todayOverview'));
+      showTodaySummary();
     }
 
     function logsArray() {
@@ -1255,8 +1273,7 @@
         });
       });
 
-      els.goToLogBtn.addEventListener('click', openSessionDetails);
-      els.backToSummaryBtn.addEventListener('click', () => scrollToElement(document.getElementById('todayOverview')));
+      els.backToSummaryBtn.addEventListener('click', showTodaySummary);
       els.dateInput.addEventListener('change', () => loadDate(els.dateInput.value));
       els.sessionType.addEventListener('change', openSessionDetails);
       els.gymPlanSelect.addEventListener('change', () => { renderExerciseRows(); updateSessionUi(); });
