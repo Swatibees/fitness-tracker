@@ -1,7 +1,7 @@
 {
   "name": "5K Fitness Tracker",
   "short_name": "5K Tracker",
-  "description": "Track gym days, Runna runs, weight, steps and 5K progress.",
+  "description": "Track gym plans, Runna runs, exercise weights and reps, weight, mood and energy.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

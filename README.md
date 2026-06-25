@@ -1,25 +1,30 @@
 # 5K Fitness Tracker PWA
 
-A simple mobile-friendly tracker for:
+Phone-accessible tracker for a 5K running + gym plan.
 
-- Monday/Wednesday/Friday gym sessions
-- Tuesday/Thursday/Saturday Runna runs
-- Sunday recovery
-- Run distance and time
-- Gym/class minutes
-- Steps
-- Weight
-- Energy level
-- Optional glucose notes
-- Export/import backup
+## Main features
 
-## How to put it on your phone
+- Front page daily log with date and automatic Gym / Run / Recovery day.
+- Gym days: choose a saved plan, then log exercises with weight, reps, sets and effort.
+- Run days: log distance, pace, time, run type and how it felt.
+- Daily check-in: body weight, steps, mood, energy level and notes.
+- Progress screen: weekly sessions, run distance, best distance, latest weight and 5K progress.
+- Custom gym plans: add your own plans and exercises.
+- Backup/export and import.
 
-1. Upload the whole folder or the ZIP to a static host such as Netlify Drop.
-2. Open the deployed link on your phone.
-3. iPhone: open in Safari, tap Share, then Add to Home Screen.
-4. Android: open in Chrome, tap the menu, Add to home screen, then Install.
+## GitHub Pages update steps
 
-## Important
+1. Unzip this folder.
+2. Open your GitHub repository.
+3. Upload/replace all files in the repository root:
+   - `index.html`
+   - `manifest.json`
+   - `service-worker.js`
+   - `icon-192.png`
+   - `icon-512.png`
+   - `README.md`
+4. Commit the changes.
+5. Wait for GitHub Pages to deploy.
+6. Open your GitHub Pages link on your phone.
 
-The app saves data locally in the browser on the device where you use it. Use Export backup regularly if you want a copy.
+Your data is saved locally in your phone/browser. Use **Data > Export backup** regularly.
