@@ -133,6 +133,15 @@
       padding-top: 16px;
     }
 
+    .page-panel.details.reveal {
+      animation: pageReveal .34s ease both;
+    }
+
+    @keyframes pageReveal {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     .hero {
       border-radius: 30px;
       padding: 20px;
@@ -382,7 +391,7 @@
       <div class="top-row">
         <div>
           <h1>5K + Gym Tracker</h1>
-          <p class="muted" id="subtitle">Summary first. Details one scroll down.</p>
+          <p class="muted" id="subtitle">Summary first. Choose a session to continue.</p>
         </div>
         <span class="badge" id="todayBadge">Today</span>
       </div>
@@ -397,7 +406,7 @@
             <div class="hero-content">
               <p class="muted" id="overviewKicker">Today’s plan</p>
               <h2 id="overviewTitle">Choose date + session</h2>
-              <p class="muted">Your summary stays clean. Detailed logging is on the next page.</p>
+              <p class="muted">Pick Gym, Run or Rest. The session details open on the next page.</p>
 
               <div class="hero-grid">
                 <div>
@@ -416,9 +425,9 @@
 
               <div class="section">
                 <div class="session-pill-row" aria-label="Quick session type">
-                  <button type="button" class="session-pill" data-session="gym">🏋️ Gym</button>
-                  <button type="button" class="session-pill" data-session="run">🏃 Run</button>
-                  <button type="button" class="session-pill" data-session="recovery">🌿 Rest</button>
+                  <button type="button" class="session-pill" data-session="gym">🏋️ Gym →</button>
+                  <button type="button" class="session-pill" data-session="run">🏃 Run →</button>
+                  <button type="button" class="session-pill" data-session="recovery">🌿 Rest →</button>
                 </div>
               </div>
             </div>
@@ -453,7 +462,7 @@
           </div>
 
           <div class="section">
-            <button type="button" class="primary" id="goToLogBtn">Scroll to log details ↓</button>
+            <button type="button" class="primary" id="goToLogBtn">Continue to session details →</button>
           </div>
         </section>
 
@@ -461,7 +470,7 @@
           <div class="card">
             <div class="top-row">
               <div>
-                <h2 id="logDetailsTitle">Log details</h2>
+                <h2 id="logDetailsTitle">Session details</h2>
                 <p class="muted" id="logContext">—</p>
               </div>
               <button type="button" class="ghost" id="backToSummaryBtn">↑ Summary</button>
@@ -624,7 +633,7 @@
         <h2 id="dataTitle">Data</h2>
         <div class="card">
           <h2>Backup</h2>
-          <p class="muted">Your tracker saves data on this phone/browser. Export a backup regularly.</p>
+          <p class="muted">Your tracker saves data on this phone/browser. Export a backup regularly. App version: v4-session-flow.</p>
           <div class="inline-actions section">
             <button type="button" class="secondary" id="exportBtn">Export backup</button>
             <button type="button" class="ghost" id="importBtn">Import backup</button>
@@ -682,6 +691,7 @@
     };
 
     const STORAGE_KEY = 'fitness5kTrackerV2';
+    const APP_VERSION = 'v4-session-flow';
     let state = loadState();
 
     const els = {
@@ -826,6 +836,15 @@
 
     function scrollToElement(element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function openSessionDetails() {
+      updateSessionUi();
+      const panel = document.getElementById('todayLogPanel');
+      panel.classList.remove('reveal');
+      void panel.offsetWidth;
+      panel.classList.add('reveal');
+      scrollToElement(panel);
     }
 
     function setActiveTab(screenId) {
@@ -1211,7 +1230,16 @@
 
     function registerServiceWorker() {
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (refreshing) return;
+          refreshing = true;
+          window.location.reload();
+        });
+
+        navigator.serviceWorker.register('./service-worker.js').then(registration => {
+          registration.update().catch(() => {});
+        }).catch(() => {});
       }
     }
 
@@ -1223,14 +1251,14 @@
       document.querySelectorAll('.session-pill').forEach(btn => {
         btn.addEventListener('click', () => {
           els.sessionType.value = btn.dataset.session;
-          updateSessionUi();
+          openSessionDetails();
         });
       });
 
-      els.goToLogBtn.addEventListener('click', () => scrollToElement(document.getElementById('todayLogPanel')));
+      els.goToLogBtn.addEventListener('click', openSessionDetails);
       els.backToSummaryBtn.addEventListener('click', () => scrollToElement(document.getElementById('todayOverview')));
       els.dateInput.addEventListener('change', () => loadDate(els.dateInput.value));
-      els.sessionType.addEventListener('change', updateSessionUi);
+      els.sessionType.addEventListener('change', openSessionDetails);
       els.gymPlanSelect.addEventListener('change', () => { renderExerciseRows(); updateSessionUi(); });
       els.runType.addEventListener('change', updateSessionUi);
       els.energy.addEventListener('input', () => { els.energyLabel.textContent = els.energy.value; });

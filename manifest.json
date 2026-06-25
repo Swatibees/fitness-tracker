@@ -1,8 +1,8 @@
 {
   "name": "5K Fitness Tracker",
   "short_name": "5K Tracker",
-  "description": "Track gym plans, Runna runs, exercise weights and reps, weight, mood and energy.",
-  "start_url": "./index.html",
+  "description": "Track 5K running, gym plans, session details, weight, mood and energy.",
+  "start_url": "./index.html?app=v4-session-flow",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f7f3ff",
