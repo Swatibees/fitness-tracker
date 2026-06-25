@@ -1,0 +1,825 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="description" content="A simple 5K, gym, weight and fitness progress tracker.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <title>5K Fitness Tracker</title>
+  <style>
+    :root {
+      --bg: #f7f8fb;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --good: #059669;
+      --warn: #d97706;
+      --danger: #dc2626;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      color-scheme: light;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0b1120;
+        --card: #111827;
+        --text: #f9fafb;
+        --muted: #9ca3af;
+        --border: #243044;
+        --accent: #60a5fa;
+        --accent-soft: #1e3a5f;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+        color-scheme: dark;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .app {
+      max-width: 760px;
+      margin: 0 auto;
+      min-height: 100svh;
+      padding: 16px 14px 88px;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      margin: -16px -14px 16px;
+      padding: calc(env(safe-area-inset-top) + 14px) 14px 12px;
+      background: color-mix(in srgb, var(--bg) 90%, transparent);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: 1.25rem; line-height: 1.2; }
+    h2 { font-size: 1rem; margin-bottom: 10px; }
+    h3 { font-size: .95rem; }
+    small, .muted { color: var(--muted); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: .82rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .metrics {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (min-width: 640px) {
+      .metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .two-col { grid-template-columns: 1fr 1fr; }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .metric-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+      min-height: 92px;
+      box-shadow: var(--shadow);
+    }
+
+    .metric-label { color: var(--muted); font-size: .82rem; }
+    .metric-value { font-size: 1.45rem; font-weight: 800; margin-top: 3px; }
+    .metric-sub { color: var(--muted); font-size: .78rem; margin-top: 2px; }
+
+    .section { margin-top: 14px; }
+
+    label {
+      display: block;
+      font-size: .88rem;
+      font-weight: 650;
+      margin-bottom: 5px;
+    }
+
+    input, select, textarea, button {
+      font: inherit;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--card);
+      color: var(--text);
+    }
+
+    textarea { resize: vertical; min-height: 78px; }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--card) 94%, var(--accent-soft));
+    }
+
+    .check-row input { width: 20px; height: 20px; }
+    .check-row label { margin: 0; font-weight: 700; }
+
+    button {
+      border: 0;
+      border-radius: 13px;
+      padding: 12px 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: var(--accent);
+      color: white;
+      width: 100%;
+    }
+
+    .secondary {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border));
+    }
+
+    .danger {
+      background: color-mix(in srgb, var(--danger) 12%, var(--card));
+      color: var(--danger);
+      border: 1px solid color-mix(in srgb, var(--danger) 25%, var(--border));
+    }
+
+    .plan-card {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 11px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 8px;
+    }
+
+    .plan-icon {
+      width: 35px;
+      height: 35px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: var(--accent-soft);
+      flex: 0 0 auto;
+    }
+
+    .progress-track {
+      height: 10px;
+      background: color-mix(in srgb, var(--border) 70%, transparent);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      border-radius: inherit;
+      transition: width .25s ease;
+    }
+
+    .history-item {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 11px;
+      margin-bottom: 8px;
+      background: color-mix(in srgb, var(--card) 96%, var(--accent-soft));
+    }
+
+    .history-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 20;
+      padding: 8px 10px calc(env(safe-area-inset-bottom) + 8px);
+      background: color-mix(in srgb, var(--card) 92%, transparent);
+      border-top: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+    }
+
+    .nav-inner {
+      max-width: 760px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 7px;
+    }
+
+    .nav-btn {
+      background: transparent;
+      color: var(--muted);
+      padding: 8px 4px;
+      border-radius: 12px;
+      font-size: .77rem;
+    }
+
+    .nav-btn.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .tab { display: none; }
+    .tab.active { display: block; }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div class="top-row">
+        <div>
+          <h1>5K Fitness Tracker</h1>
+          <small>Runna + Snap Fitness plan</small>
+        </div>
+        <span class="badge" id="todayBadge">Today</span>
+      </div>
+    </header>
+
+    <section id="dashboard" class="tab active" aria-labelledby="dashboardTitle">
+      <h2 id="dashboardTitle">Dashboard</h2>
+      <div class="grid metrics">
+        <div class="metric-card">
+          <div class="metric-label">Sessions</div>
+          <div class="metric-value" id="metricSessions">0/6</div>
+          <div class="metric-sub">This week</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Running</div>
+          <div class="metric-value" id="metricKm">0 km</div>
+          <div class="metric-sub">This week</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Strength</div>
+          <div class="metric-value" id="metricGym">0 min</div>
+          <div class="metric-sub">This week</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Weight</div>
+          <div class="metric-value" id="metricWeight">—</div>
+          <div class="metric-sub">Latest entry</div>
+        </div>
+      </div>
+
+      <div class="section card">
+        <h2>Today’s plan</h2>
+        <div class="plan-card">
+          <div class="plan-icon" id="todayIcon">🏃</div>
+          <div>
+            <h3 id="todayTitle">—</h3>
+            <p class="muted" id="todayDetail">—</p>
+          </div>
+        </div>
+        <div class="progress-track" aria-label="Weekly completion progress">
+          <div class="progress-fill" id="weekProgress"></div>
+        </div>
+        <small id="weekProgressText">0% weekly completion</small>
+      </div>
+
+      <div class="section card">
+        <h2>Recent progress</h2>
+        <div id="recentList" class="muted">No logs yet.</div>
+      </div>
+    </section>
+
+    <section id="log" class="tab" aria-labelledby="logTitle">
+      <h2 id="logTitle">Daily log</h2>
+      <div class="card">
+        <div class="grid">
+          <div>
+            <label for="dateInput">Date</label>
+            <input id="dateInput" type="date">
+          </div>
+
+          <div>
+            <label for="sessionInput">Session</label>
+            <select id="sessionInput">
+              <option value="auto">Use planned session</option>
+              <option value="Gym lower body + core">Gym lower body + core</option>
+              <option value="Gym upper body or class">Gym upper body or class</option>
+              <option value="Gym full body strength">Gym full body strength</option>
+              <option value="Runna easy run">Runna easy run</option>
+              <option value="Runna intervals">Runna intervals</option>
+              <option value="Runna long easy run">Runna long easy run</option>
+              <option value="Rest / recovery">Rest / recovery</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="check-row">
+            <input id="completedInput" type="checkbox">
+            <label for="completedInput">Completed main session</label>
+          </div>
+
+          <div class="field-row">
+            <div>
+              <label for="runKmInput">Run distance, km</label>
+              <input id="runKmInput" type="number" min="0" step="0.1" inputmode="decimal" placeholder="0">
+            </div>
+            <div>
+              <label for="runMinInput">Run time, min</label>
+              <input id="runMinInput" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div>
+              <label for="gymMinInput">Gym/class, min</label>
+              <input id="gymMinInput" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+            </div>
+            <div>
+              <label for="stepsInput">Steps</label>
+              <input id="stepsInput" type="number" min="0" step="100" inputmode="numeric" placeholder="7000">
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div>
+              <label for="weightInput">Weight, kg</label>
+              <input id="weightInput" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Optional">
+            </div>
+            <div>
+              <label for="energyInput">Energy, 1–5</label>
+              <select id="energyInput">
+                <option value="1">1 — very low</option>
+                <option value="2">2 — low</option>
+                <option value="3" selected>3 — okay</option>
+                <option value="4">4 — good</option>
+                <option value="5">5 — strong</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label for="glucoseInput">Glucose note</label>
+            <input id="glucoseInput" type="text" placeholder="Optional: before/after exercise reading">
+          </div>
+
+          <div>
+            <label for="notesInput">Notes</label>
+            <textarea id="notesInput" placeholder="Example: felt strong, knees okay, class was hard, Runna pace felt easy"></textarea>
+          </div>
+
+          <button class="primary" id="saveBtn" type="button">Save log</button>
+          <small id="saveStatus" role="status" aria-live="polite"></small>
+        </div>
+      </div>
+    </section>
+
+    <section id="plan" class="tab" aria-labelledby="planTitle">
+      <h2 id="planTitle">Weekly plan</h2>
+      <div class="card" id="planList"></div>
+    </section>
+
+    <section id="data" class="tab" aria-labelledby="dataTitle">
+      <h2 id="dataTitle">Data</h2>
+      <div class="card grid">
+        <p class="muted">Your entries are saved in this browser on this device. Export a backup regularly.</p>
+        <div class="button-row">
+          <button class="secondary" id="exportCsvBtn" type="button">Export CSV</button>
+          <button class="secondary" id="exportJsonBtn" type="button">Export backup</button>
+        </div>
+        <div>
+          <label for="importFile">Import backup JSON</label>
+          <input id="importFile" type="file" accept="application/json,.json">
+        </div>
+        <button class="danger" id="resetBtn" type="button">Delete all local data</button>
+        <small id="dataStatus" role="status" aria-live="polite"></small>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <button class="nav-btn active" type="button" data-tab="dashboard">🏠<br>Home</button>
+      <button class="nav-btn" type="button" data-tab="log">➕<br>Log</button>
+      <button class="nav-btn" type="button" data-tab="plan">📅<br>Plan</button>
+      <button class="nav-btn" type="button" data-tab="data">⬇️<br>Data</button>
+    </div>
+  </nav>
+
+  <script>
+    const STORAGE_KEY = "swati_5k_fitness_tracker_v1";
+
+    const weeklyPlan = [
+      { index: 1, day: "Monday", icon: "🏋️", session: "Gym lower body + core", detail: "Leg press or squat, Romanian deadlift, lunges, glute bridge, calves, plank." },
+      { index: 2, day: "Tuesday", icon: "🏃", session: "Runna easy run", detail: "Easy run or walk-run. Keep the pace comfortable." },
+      { index: 3, day: "Wednesday", icon: "💪", session: "Gym upper body or class", detail: "Upper body strength, Pilates, core, or low-impact conditioning class." },
+      { index: 4, day: "Thursday", icon: "⚡", session: "Runna intervals", detail: "Short faster sections with recovery. Controlled effort, not sprinting." },
+      { index: 5, day: "Friday", icon: "🏋️", session: "Gym full body strength", detail: "Squat/leg press, dumbbell deadlift, step-ups, push, pull, carry, core." },
+      { index: 6, day: "Saturday", icon: "🏃", session: "Runna long easy run", detail: "Long easy run. Build slowly towards a comfortable 5K." },
+      { index: 0, day: "Sunday", icon: "🌿", session: "Rest / recovery", detail: "Light walk, stretching, sleep, hydration and food prep." }
+    ];
+
+    const state = {
+      logs: loadLogs()
+    };
+
+    const els = {
+      tabs: document.querySelectorAll(".tab"),
+      navButtons: document.querySelectorAll(".nav-btn"),
+      todayBadge: document.getElementById("todayBadge"),
+      todayIcon: document.getElementById("todayIcon"),
+      todayTitle: document.getElementById("todayTitle"),
+      todayDetail: document.getElementById("todayDetail"),
+      metricSessions: document.getElementById("metricSessions"),
+      metricKm: document.getElementById("metricKm"),
+      metricGym: document.getElementById("metricGym"),
+      metricWeight: document.getElementById("metricWeight"),
+      weekProgress: document.getElementById("weekProgress"),
+      weekProgressText: document.getElementById("weekProgressText"),
+      recentList: document.getElementById("recentList"),
+      planList: document.getElementById("planList"),
+      dateInput: document.getElementById("dateInput"),
+      sessionInput: document.getElementById("sessionInput"),
+      completedInput: document.getElementById("completedInput"),
+      runKmInput: document.getElementById("runKmInput"),
+      runMinInput: document.getElementById("runMinInput"),
+      gymMinInput: document.getElementById("gymMinInput"),
+      stepsInput: document.getElementById("stepsInput"),
+      weightInput: document.getElementById("weightInput"),
+      energyInput: document.getElementById("energyInput"),
+      glucoseInput: document.getElementById("glucoseInput"),
+      notesInput: document.getElementById("notesInput"),
+      saveBtn: document.getElementById("saveBtn"),
+      saveStatus: document.getElementById("saveStatus"),
+      exportCsvBtn: document.getElementById("exportCsvBtn"),
+      exportJsonBtn: document.getElementById("exportJsonBtn"),
+      importFile: document.getElementById("importFile"),
+      resetBtn: document.getElementById("resetBtn"),
+      dataStatus: document.getElementById("dataStatus")
+    };
+
+    function loadLogs() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveLogs() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.logs));
+    }
+
+    function todayIso() {
+      const now = new Date();
+      const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+      return local.toISOString().slice(0, 10);
+    }
+
+    function getPlanForDate(iso) {
+      const date = new Date(iso + "T12:00:00");
+      const index = date.getDay();
+      return weeklyPlan.find(item => item.index === index);
+    }
+
+    function getMonday(iso) {
+      const date = new Date(iso + "T12:00:00");
+      const day = date.getDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      date.setDate(date.getDate() + diff);
+      return date;
+    }
+
+    function sameWeek(a, b) {
+      return getMonday(a).toDateString() === getMonday(b).toDateString();
+    }
+
+    function numberValue(input) {
+      const value = Number(input.value);
+      return Number.isFinite(value) ? value : 0;
+    }
+
+    function text(value) {
+      return String(value ?? "");
+    }
+
+    function renderToday() {
+      const iso = todayIso();
+      const plan = getPlanForDate(iso);
+      const date = new Date(iso + "T12:00:00");
+      els.todayBadge.textContent = date.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
+      els.todayIcon.textContent = plan.icon;
+      els.todayTitle.textContent = plan.day + " — " + plan.session;
+      els.todayDetail.textContent = plan.detail;
+    }
+
+    function renderPlan() {
+      els.planList.innerHTML = "";
+      weeklyPlan.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "plan-card";
+        row.innerHTML = `
+          <div class="plan-icon" aria-hidden="true">${item.icon}</div>
+          <div>
+            <h3>${item.day}</h3>
+            <p><strong>${item.session}</strong></p>
+            <p class="muted">${item.detail}</p>
+          </div>
+        `;
+        els.planList.appendChild(row);
+      });
+    }
+
+    function renderMetrics() {
+      const now = todayIso();
+      const weekLogs = state.logs.filter(log => sameWeek(log.date, now));
+      const completed = weekLogs.filter(log => log.completed && getPlanForDate(log.date).session !== "Rest / recovery").length;
+      const km = weekLogs.reduce((sum, log) => sum + Number(log.runKm || 0), 0);
+      const gym = weekLogs.reduce((sum, log) => sum + Number(log.gymMin || 0), 0);
+      const weights = state.logs
+        .filter(log => log.weight !== "" && log.weight !== null && !Number.isNaN(Number(log.weight)))
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      els.metricSessions.textContent = completed + "/6";
+      els.metricKm.textContent = km.toFixed(1) + " km";
+      els.metricGym.textContent = Math.round(gym) + " min";
+      els.metricWeight.textContent = weights.length ? Number(weights[weights.length - 1].weight).toFixed(1) + " kg" : "—";
+
+      const percent = Math.min(100, Math.round((completed / 6) * 100));
+      els.weekProgress.style.width = percent + "%";
+      els.weekProgressText.textContent = percent + "% weekly completion";
+    }
+
+    function renderRecent() {
+      if (!state.logs.length) {
+        els.recentList.textContent = "No logs yet.";
+        return;
+      }
+
+      els.recentList.innerHTML = "";
+      state.logs
+        .slice()
+        .sort((a, b) => b.date.localeCompare(a.date))
+        .slice(0, 8)
+        .forEach(log => {
+          const plan = getPlanForDate(log.date);
+          const item = document.createElement("article");
+          item.className = "history-item";
+          item.innerHTML = `
+            <div class="history-top">
+              <div>
+                <h3>${log.date} — ${text(log.session || plan.session)}</h3>
+                <small>${log.completed ? "Completed" : "Not completed"} · Energy ${log.energy || "—"}/5</small>
+              </div>
+              <span class="badge">${plan.icon}</span>
+            </div>
+            <p class="muted" style="margin-top: 6px;">Run ${Number(log.runKm || 0).toFixed(1)} km / ${Number(log.runMin || 0)} min · Gym ${Number(log.gymMin || 0)} min · Steps ${Number(log.steps || 0)}</p>
+            ${log.notes ? `<p style="margin-top: 6px;">${escapeHtml(log.notes)}</p>` : ""}
+          `;
+          els.recentList.appendChild(item);
+        });
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>'"]/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "'": "&#39;",
+        '"': "&quot;"
+      }[char]));
+    }
+
+    function prefillForDate() {
+      const iso = els.dateInput.value || todayIso();
+      const existing = state.logs.find(log => log.date === iso);
+      if (existing) {
+        els.sessionInput.value = "Other";
+        const matching = Array.from(els.sessionInput.options).find(opt => opt.value === existing.session);
+        if (matching) els.sessionInput.value = existing.session;
+        els.completedInput.checked = Boolean(existing.completed);
+        els.runKmInput.value = existing.runKm ?? "";
+        els.runMinInput.value = existing.runMin ?? "";
+        els.gymMinInput.value = existing.gymMin ?? "";
+        els.stepsInput.value = existing.steps ?? "";
+        els.weightInput.value = existing.weight ?? "";
+        els.energyInput.value = existing.energy ?? "3";
+        els.glucoseInput.value = existing.glucose ?? "";
+        els.notesInput.value = existing.notes ?? "";
+      } else {
+        els.sessionInput.value = "auto";
+        els.completedInput.checked = false;
+        els.runKmInput.value = "";
+        els.runMinInput.value = "";
+        els.gymMinInput.value = "";
+        els.stepsInput.value = "";
+        els.weightInput.value = "";
+        els.energyInput.value = "3";
+        els.glucoseInput.value = "";
+        els.notesInput.value = "";
+      }
+    }
+
+    function saveLog() {
+      const date = els.dateInput.value || todayIso();
+      const plan = getPlanForDate(date);
+      const session = els.sessionInput.value === "auto" ? plan.session : els.sessionInput.value;
+      const log = {
+        date,
+        session,
+        completed: els.completedInput.checked,
+        runKm: numberValue(els.runKmInput),
+        runMin: numberValue(els.runMinInput),
+        gymMin: numberValue(els.gymMinInput),
+        steps: numberValue(els.stepsInput),
+        weight: els.weightInput.value === "" ? "" : Number(els.weightInput.value),
+        energy: Number(els.energyInput.value),
+        glucose: els.glucoseInput.value.trim(),
+        notes: els.notesInput.value.trim(),
+        savedAt: new Date().toISOString()
+      };
+
+      const index = state.logs.findIndex(item => item.date === date);
+      if (index >= 0) state.logs[index] = log;
+      else state.logs.push(log);
+      saveLogs();
+      renderAll();
+      els.saveStatus.textContent = "Saved " + date + ".";
+    }
+
+    function downloadFile(filename, content, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 500);
+    }
+
+    function exportCsv() {
+      const headers = ["date", "session", "completed", "run_km", "run_min", "gym_min", "steps", "weight_kg", "energy", "glucose", "notes"];
+      const rows = state.logs
+        .slice()
+        .sort((a, b) => a.date.localeCompare(b.date))
+        .map(log => headers.map(h => {
+          const map = {
+            date: log.date,
+            session: log.session,
+            completed: log.completed,
+            run_km: log.runKm,
+            run_min: log.runMin,
+            gym_min: log.gymMin,
+            steps: log.steps,
+            weight_kg: log.weight,
+            energy: log.energy,
+            glucose: log.glucose,
+            notes: log.notes
+          };
+          const value = String(map[h] ?? "");
+          return '"' + value.replace(/"/g, '""') + '"';
+        }).join(","));
+      downloadFile("5k-fitness-tracker.csv", [headers.join(","), ...rows].join("\n"), "text/csv");
+      els.dataStatus.textContent = "CSV exported.";
+    }
+
+    function exportJson() {
+      downloadFile("5k-fitness-tracker-backup.json", JSON.stringify(state.logs, null, 2), "application/json");
+      els.dataStatus.textContent = "Backup exported.";
+    }
+
+    function importJson(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const imported = JSON.parse(reader.result);
+          if (!Array.isArray(imported)) throw new Error("Invalid backup");
+          state.logs = imported;
+          saveLogs();
+          renderAll();
+          els.dataStatus.textContent = "Backup imported.";
+        } catch {
+          els.dataStatus.textContent = "Could not import this file.";
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function resetData() {
+      const ok = confirm("Delete all local tracker data on this device?");
+      if (!ok) return;
+      state.logs = [];
+      saveLogs();
+      renderAll();
+      els.dataStatus.textContent = "All local data deleted.";
+    }
+
+    function switchTab(name) {
+      els.tabs.forEach(tab => tab.classList.toggle("active", tab.id === name));
+      els.navButtons.forEach(btn => btn.classList.toggle("active", btn.dataset.tab === name));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function renderAll() {
+      renderToday();
+      renderPlan();
+      renderMetrics();
+      renderRecent();
+    }
+
+    els.dateInput.value = todayIso();
+    prefillForDate();
+    renderAll();
+
+    els.dateInput.addEventListener("change", prefillForDate);
+    els.saveBtn.addEventListener("click", saveLog);
+    els.exportCsvBtn.addEventListener("click", exportCsv);
+    els.exportJsonBtn.addEventListener("click", exportJson);
+    els.importFile.addEventListener("change", event => {
+      const file = event.target.files && event.target.files[0];
+      if (file) importJson(file);
+    });
+    els.resetBtn.addEventListener("click", resetData);
+    els.navButtons.forEach(btn => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js").catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
